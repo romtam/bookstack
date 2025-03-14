@@ -88,7 +88,7 @@ class RouteServiceProvider extends ServiceProvider
 
         RateLimiter::for('exports', function (Request $request) {
             $user = user();
-            $attempts = $user->isGuest() ? 4 : 10;
+            $attempts = $user->isGuest() ? 1 : 2;
             $key = $user->isGuest() ? $request->ip() : $user->id;
             return Limit::perMinute($attempts)->by($key);
         });
