@@ -1,5 +1,5 @@
-import {onSelect} from '../services/dom';
-import {debounce} from '../services/util';
+import {onSelect} from '../services/dom.ts';
+import {debounce} from '../services/util.ts';
 import {Component} from './component';
 import {utcTimeStampToLocalTime} from '../services/dates.ts';
 
@@ -138,7 +138,7 @@ export class PageEditor extends Component {
 
             didSave = true;
             this.autoSave.pendingChange = false;
-        } catch (err) {
+        } catch {
             // Save the editor content in LocalStorage as a last resort, just in case.
             try {
                 const saveKey = `draft-save-fail-${(new Date()).toISOString()}`;

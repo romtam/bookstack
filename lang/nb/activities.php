@@ -85,6 +85,14 @@ return [
     'webhook_delete' => 'slettet webhook',
     'webhook_delete_notification' => 'Webhook ble slettet',
 
+    // Imports
+    'import_create' => 'import opprettet',
+    'import_create_notification' => 'Importen ble opplastet',
+    'import_run' => 'oppdatert import',
+    'import_run_notification' => 'Innhold importert',
+    'import_delete' => 'import slettet',
+    'import_delete_notification' => 'Importering ble slettet',
+
     // Users
     'user_create' => 'opprettet bruker',
     'user_create_notification' => 'Bruker ble opprettet',
@@ -119,6 +127,14 @@ return [
     'comment_create'              => 'lagt til kommentar',
     'comment_update'              => 'oppdatert kommentar',
     'comment_delete'              => 'slettet kommentar',
+
+    // Sort Rules
+    'sort_rule_create' => 'created sort rule',
+    'sort_rule_create_notification' => 'Sort rule successfully created',
+    'sort_rule_update' => 'updated sort rule',
+    'sort_rule_update_notification' => 'Sort rule successfully updated',
+    'sort_rule_delete' => 'deleted sort rule',
+    'sort_rule_delete_notification' => 'Sort rule successfully deleted',
 
     // Other
     'permissions_update'          => 'oppdaterte tilganger',

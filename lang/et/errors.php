@@ -105,6 +105,18 @@ return [
     'app_down' => ':appName on hetkel maas',
     'back_soon' => 'See on varsti tagasi.',
 
+    // Import
+    'import_zip_cant_read' => 'ZIP-faili lugemine ebaõnnestus.',
+    'import_zip_cant_decode_data' => 'ZIP-failist ei leitud data.json sisu.',
+    'import_zip_no_data' => 'ZIP-failist ei leitud raamatute, peatükkide või lehtede sisu.',
+    'import_validation_failed' => 'Imporditud ZIP-faili valideerimine ebaõnnestus vigadega:',
+    'import_zip_failed_notification' => 'ZIP-faili importimine ebaõnnestus.',
+    'import_perms_books' => 'Sul puuduvad õigused raamatute lisamiseks.',
+    'import_perms_chapters' => 'Sul puuduvad õigused peatükkide lisamiseks.',
+    'import_perms_pages' => 'Sul puuduvad õigused lehtede lisamiseks.',
+    'import_perms_images' => 'Sul puuduvad õigused piltide lisamiseks.',
+    'import_perms_attachments' => 'Sul puuduvad õigused manuste lisamiseks.',
+
     // API errors
     'api_no_authorization_found' => 'Päringust ei leitud volitustunnust',
     'api_bad_authorization_format' => 'Päringust leiti volitustunnus, aga see ei olnud korrektses formaadis',

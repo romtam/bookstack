@@ -84,6 +84,14 @@ return [
     'webhook_delete' => 'がWebhookを削除',
     'webhook_delete_notification' => 'Webhookを削除しました',
 
+    // Imports
+    'import_create' => 'created import',
+    'import_create_notification' => 'インポートファイルが正常にアップロードされました',
+    'import_run' => 'updated import',
+    'import_run_notification' => 'コンテンツが正常にインポートされました',
+    'import_delete' => 'deleted import',
+    'import_delete_notification' => 'インポートファイルが正常に削除されました',
+
     // Users
     'user_create' => 'がユーザを作成',
     'user_create_notification' => 'ユーザーを作成しました',
@@ -118,6 +126,14 @@ return [
     'comment_create'              => 'がコメントを追加',
     'comment_update'              => 'がコメントを更新',
     'comment_delete'              => 'がコメントを削除',
+
+    // Sort Rules
+    'sort_rule_create' => 'created sort rule',
+    'sort_rule_create_notification' => 'Sort rule successfully created',
+    'sort_rule_update' => 'updated sort rule',
+    'sort_rule_update_notification' => 'Sort rule successfully updated',
+    'sort_rule_delete' => 'deleted sort rule',
+    'sort_rule_delete_notification' => 'Sort rule successfully deleted',
 
     // Other
     'permissions_update'          => 'が権限を更新:',

@@ -31,11 +31,12 @@ class ImageService
         UploadedFile $uploadedFile,
         string $type,
         int $uploadedTo = 0,
-        int $resizeWidth = null,
-        int $resizeHeight = null,
-        bool $keepRatio = true
+        ?int $resizeWidth = null,
+        ?int $resizeHeight = null,
+        bool $keepRatio = true,
+        string $imageName = '',
     ): Image {
-        $imageName = $uploadedFile->getClientOriginalName();
+        $imageName = $imageName ?: $uploadedFile->getClientOriginalName();
         $imageData = file_get_contents($uploadedFile->getRealPath());
 
         if ($resizeWidth !== null || $resizeHeight !== null) {
@@ -134,15 +135,36 @@ class ImageService
     }
 
     /**
+     * Get the raw data content from an image.
+     *
+     * @throws Exception
+     * @returns ?resource
+     */
+    public function getImageStream(Image $image): mixed
+    {
+        $disk = $this->storage->getDisk();
+
+        return $disk->stream($image->path);
+    }
+
+    /**
      * Destroy an image along with its revisions, thumbnails and remaining folders.
      *
      * @throws Exception
      */
     public function destroy(Image $image): void
     {
-        $disk = $this->storage->getDisk($image->type);
-        $disk->destroyAllMatchingNameFromPath($image->path);
+        $this->destroyFileAtPath($image->type, $image->path);
         $image->delete();
+    }
+
+    /**
+     * Destroy the underlying image file at the given path.
+     */
+    public function destroyFileAtPath(string $type, string $path): void
+    {
+        $disk = $this->storage->getDisk($type);
+        $disk->destroyAllMatchingNameFromPath($path);
     }
 
     /**

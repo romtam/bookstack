@@ -10,10 +10,10 @@ import {createHeadlessEditor} from '@lexical/headless';
 import {AutoLinkNode, LinkNode} from '@lexical/link';
 import {ListItemNode, ListNode} from '@lexical/list';
 
-import {HeadingNode, QuoteNode} from '@lexical/rich-text';
 import {TableCellNode, TableNode, TableRowNode} from '@lexical/table';
 
 import {
+  $getSelection,
   $isRangeSelection,
   createEditor,
   DecoratorNode,
@@ -30,13 +30,13 @@ import {
   TextNode,
 } from 'lexical';
 
-import {
-  CreateEditorArgs,
-  HTMLConfig,
-  LexicalNodeReplacement,
-} from '../../LexicalEditor';
+import {CreateEditorArgs, HTMLConfig, LexicalNodeReplacement,} from '../../LexicalEditor';
 import {resetRandomKey} from '../../LexicalUtils';
-
+import {HeadingNode} from "@lexical/rich-text/LexicalHeadingNode";
+import {QuoteNode} from "@lexical/rich-text/LexicalQuoteNode";
+import {DetailsNode} from "@lexical/rich-text/LexicalDetailsNode";
+import {EditorUiContext} from "../../../../ui/framework/core";
+import {EditorUIManager} from "../../../../ui/framework/manager";
 
 type TestEnv = {
   readonly container: HTMLDivElement;
@@ -45,6 +45,9 @@ type TestEnv = {
   readonly innerHTML: string;
 };
 
+/**
+ * @deprecated - Consider using `createTestContext` instead within the test case.
+ */
 export function initializeUnitTest(
   runTests: (testEnv: TestEnv) => void,
   editorConfig: CreateEditorArgs = {namespace: 'test', theme: {}},
@@ -129,8 +132,6 @@ export class TestElementNode extends ElementNode {
     serializedNode: SerializedTestElementNode,
   ): TestInlineElementNode {
     const node = $createTestInlineElementNode();
-    node.setFormat(serializedNode.format);
-    node.setIndent(serializedNode.indent);
     node.setDirection(serializedNode.direction);
     return node;
   }
@@ -195,8 +196,6 @@ export class TestInlineElementNode extends ElementNode {
     serializedNode: SerializedTestInlineElementNode,
   ): TestInlineElementNode {
     const node = $createTestInlineElementNode();
-    node.setFormat(serializedNode.format);
-    node.setIndent(serializedNode.indent);
     node.setDirection(serializedNode.direction);
     return node;
   }
@@ -241,8 +240,6 @@ export class TestShadowRootNode extends ElementNode {
     serializedNode: SerializedTestShadowRootNode,
   ): TestShadowRootNode {
     const node = $createTestShadowRootNode();
-    node.setFormat(serializedNode.format);
-    node.setIndent(serializedNode.indent);
     node.setDirection(serializedNode.direction);
     return node;
   }
@@ -322,8 +319,6 @@ export class TestExcludeFromCopyElementNode extends ElementNode {
     serializedNode: SerializedTestExcludeFromCopyElementNode,
   ): TestExcludeFromCopyElementNode {
     const node = $createTestExcludeFromCopyElementNode();
-    node.setFormat(serializedNode.format);
-    node.setIndent(serializedNode.indent);
     node.setDirection(serializedNode.direction);
     return node;
   }
@@ -427,6 +422,7 @@ const DEFAULT_NODES: NonNullable<ReadonlyArray<Klass<LexicalNode> | LexicalNodeR
   TableRowNode,
   AutoLinkNode,
   LinkNode,
+  DetailsNode,
   TestElementNode,
   TestSegmentedNode,
   TestExcludeFromCopyElementNode,
@@ -458,6 +454,7 @@ export function createTestEditor(
     ...config,
     nodes: DEFAULT_NODES.concat(customNodes),
   });
+
   return editor;
 }
 
@@ -470,6 +467,48 @@ export function createTestHeadlessEditor(
       throw error;
     },
   });
+}
+
+export function createTestContext(): EditorUiContext {
+
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+
+  const scrollWrap = document.createElement('div');
+  const editorDOM = document.createElement('div');
+  editorDOM.setAttribute('contenteditable', 'true');
+
+  scrollWrap.append(editorDOM);
+  container.append(scrollWrap);
+
+  const editor = createTestEditor({
+    namespace: 'testing',
+    theme: {},
+  });
+
+  editor.setRootElement(editorDOM);
+
+  const context = {
+    containerDOM: container,
+    editor: editor,
+    editorDOM: editorDOM,
+    error(text: string | Error): void {
+    },
+    manager: new EditorUIManager(),
+    options: {},
+    scrollDOM: scrollWrap,
+    translate(text: string): string {
+      return "";
+    }
+  };
+
+  context.manager.setContext(context);
+
+  return context;
+}
+
+export function destroyFromContext(context: EditorUiContext) {
+  context.containerDOM.remove();
 }
 
 export function $assertRangeSelection(selection: unknown): RangeSelection {
@@ -722,6 +761,85 @@ export function expectHtmlToBeEqual(expected: string, actual: string): void {
   expect(formatHtml(expected)).toBe(formatHtml(actual));
 }
 
+type nodeTextShape = {
+  text: string;
+};
+
+type nodeShape = {
+  type: string;
+  children?: (nodeShape|nodeTextShape)[];
+}
+
+export function getNodeShape(node: SerializedLexicalNode): nodeShape|nodeTextShape {
+  // @ts-ignore
+  const children: SerializedLexicalNode[] = (node.children || []);
+
+  const shape: nodeShape = {
+    type: node.type,
+  };
+
+  if (shape.type === 'text') {
+    // @ts-ignore
+    return  {text: node.text}
+  }
+
+  if (children.length > 0) {
+    shape.children = children.map(c => getNodeShape(c));
+  }
+
+  return shape;
+}
+
+export function expectNodeShapeToMatch(editor: LexicalEditor, expected: nodeShape[]) {
+  const json = editor.getEditorState().toJSON();
+  const shape = getNodeShape(json.root) as nodeShape;
+  expect(shape.children).toMatchObject(expected);
+}
+
+/**
+ * Expect a given prop within the JSON editor state structure to be the given value.
+ * Uses dot notation for the provided `propPath`. Example:
+ * 0.5.cat => First child, Sixth child, cat property
+ */
+export function expectEditorStateJSONPropToEqual(editor: LexicalEditor, propPath: string, expected: any) {
+  let currentItem: any = editor.getEditorState().toJSON().root;
+  let currentPath = [];
+  const pathParts = propPath.split('.');
+
+  for (const part of pathParts) {
+    currentPath.push(part);
+    const childAccess = Number.isInteger(Number(part)) && Array.isArray(currentItem.children);
+    const target = childAccess ? currentItem.children : currentItem;
+
+    if (typeof target[part] === 'undefined') {
+      throw new Error(`Could not resolve editor state at path ${currentPath.join('.')}`)
+    }
+    currentItem = target[part];
+  }
+
+  expect(currentItem).toBe(expected);
+}
+
 function formatHtml(s: string): string {
   return s.replace(/>\s+</g, '><').replace(/\s*\n\s*/g, ' ').trim();
+}
+
+export function dispatchKeydownEventForNode(node: LexicalNode, editor: LexicalEditor, key: string) {
+  const nodeDomEl = editor.getElementByKey(node.getKey());
+  const event = new KeyboardEvent('keydown', {
+    bubbles: true,
+    cancelable: true,
+    key,
+  });
+  nodeDomEl?.dispatchEvent(event);
+  editor.commitUpdates();
+}
+
+export function dispatchKeydownEventForSelectedNode(editor: LexicalEditor, key: string) {
+  editor.getEditorState().read((): void => {
+    const node = $getSelection()?.getNodes()[0] || null;
+    if (node) {
+      dispatchKeydownEventForNode(node, editor, key);
+    }
+  });
 }

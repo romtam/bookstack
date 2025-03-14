@@ -84,6 +84,14 @@ return [
     'webhook_delete' => 'supprimer un Webhook',
     'webhook_delete_notification' => 'Webhook supprimé avec succès',
 
+    // Imports
+    'import_create' => 'import créé',
+    'import_create_notification' => 'Importation envoyée avec succès',
+    'import_run' => 'importation mise à jour',
+    'import_run_notification' => 'Contenu importé avec succès',
+    'import_delete' => 'import supprimé',
+    'import_delete_notification' => 'Importation supprimée avec succès',
+
     // Users
     'user_create' => 'utilisateur créé',
     'user_create_notification' => 'Utilisateur créé avec succès',
@@ -118,6 +126,14 @@ return [
     'comment_create'              => 'Commentaire ajouté',
     'comment_update'              => 'Commentaire mis à jour',
     'comment_delete'              => 'Commentaire supprimé',
+
+    // Sort Rules
+    'sort_rule_create' => 'created sort rule',
+    'sort_rule_create_notification' => 'Sort rule successfully created',
+    'sort_rule_update' => 'updated sort rule',
+    'sort_rule_update_notification' => 'Sort rule successfully updated',
+    'sort_rule_delete' => 'deleted sort rule',
+    'sort_rule_delete_notification' => 'Sort rule successfully deleted',
 
     // Other
     'permissions_update'          => 'a mis à jour les autorisations sur',

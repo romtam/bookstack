@@ -83,8 +83,20 @@ class PageRepo
         $draft->refresh();
 
         Activity::add(ActivityType::PAGE_CREATE, $draft);
+        $this->baseRepo->sortParent($draft);
 
         return $draft;
+    }
+
+    /**
+     * Directly update the content for the given page from the provided input.
+     * Used for direct content access in a way that performs required changes
+     * (Search index & reference regen) without performing an official update.
+     */
+    public function setContentFromInput(Page $page, array $input): void
+    {
+        $this->updateTemplateStatusAndContentFromInput($page, $input);
+        $this->baseRepo->update($page, []);
     }
 
     /**
@@ -117,11 +129,12 @@ class PageRepo
         }
 
         Activity::add(ActivityType::PAGE_UPDATE, $page);
+        $this->baseRepo->sortParent($page);
 
         return $page;
     }
 
-    protected function updateTemplateStatusAndContentFromInput(Page $page, array $input)
+    protected function updateTemplateStatusAndContentFromInput(Page $page, array $input): void
     {
         if (isset($input['template']) && userCan('templates-manage')) {
             $page->template = ($input['template'] === 'true');
@@ -232,6 +245,8 @@ class PageRepo
         Activity::add(ActivityType::PAGE_RESTORE, $page);
         Activity::add(ActivityType::REVISION_RESTORE, $revision);
 
+        $this->baseRepo->sortParent($page);
+
         return $page;
     }
 
@@ -260,6 +275,8 @@ class PageRepo
         $page->rebuildPermissions();
 
         Activity::add(ActivityType::PAGE_MOVE, $page);
+
+        $this->baseRepo->sortParent($page);
 
         return $parent;
     }
