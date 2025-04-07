@@ -34,3 +34,4 @@ composer.lock
 esbuild-meta.json
 .phpactor.json
 composer.lock
+/*.zip
